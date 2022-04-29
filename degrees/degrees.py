@@ -106,7 +106,7 @@ def shortest_path(source, target):
     #process a node in frontier, then after that, take another node from frontier
     while True:
         i += 1
-        print('State Explored:', i)
+        
         if frontier.empty():
             return None
         #take a node 
