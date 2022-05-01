@@ -39,6 +39,15 @@ def actions(board):
     """
     Returns set of all possible actions (i, j) available on the board.
     """
+    actions = set()
+    # i is row, j is column
+    # basically just get all empty cells
+    for i in range(len(board)):
+        for j in range(len(i)):
+            if board[i][j] == EMPTY:
+                actions.add((i, j))
+    return actions
+
     raise NotImplementedError
 
 
@@ -46,6 +55,7 @@ def result(board, action):
     """
     Returns the board that results from making move (i, j) on the board.
     """
+    #take (row, column) as input
     raise NotImplementedError
 
 
@@ -94,3 +104,4 @@ def countItem(board):
                 count["EMPTY"] += 1
             
     return count
+
