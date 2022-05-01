@@ -2,7 +2,9 @@
 Tic Tac Toe Player
 """
 
+from copy import deepcopy
 import math
+from shutil import ExecError
 
 X = "X"
 O = "O"
@@ -56,6 +58,17 @@ def result(board, action):
     Returns the board that results from making move (i, j) on the board.
     """
     #take (row, column) as input
+    row = action[0]
+    column = action[1]
+    result = deepcopy(board)
+    player = player(board)
+
+    #check
+    if board[row][column] != EMPTY:
+        raise IlegalMoveError("Ilegal Move")
+    result[row][column] = player
+
+    return result
     raise NotImplementedError
 
 
@@ -109,4 +122,5 @@ def countItem(board):
                 count["EMPTY"] += 1
             
     return count
-
+class IlegalMoveError(Exception):
+    pass
