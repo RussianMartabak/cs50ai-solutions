@@ -70,6 +70,11 @@ def terminal(board):
     """
     Returns True if game is over, False otherwise.
     """
+    state = countItem(board)
+    if state["EMPTY"] == 0:
+        return True
+    else:
+        return False
     raise NotImplementedError
 
 
