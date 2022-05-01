@@ -22,6 +22,16 @@ def player(board):
     """
     Returns player who has the next turn on a board.
     """
+    #at start its X first
+    cellCount = countItem(board=board)
+    if cellCount["EMPTY"] == 9:
+        return X
+    # because X is first if their number is same its X turn
+    elif cellCount["X"] == cellCount["O"]:
+        return X
+    else:
+        return O
+
     raise NotImplementedError
 
 
@@ -65,3 +75,22 @@ def minimax(board):
     Returns the optimal action for the current player on the board.
     """
     raise NotImplementedError
+
+#function to count board cells for items
+#return dictionary
+def countItem(board):
+    count = {
+        "X": 0,
+        "O": 0,
+        "EMPTY": 0
+    }
+    for row in board:
+        for cell in row:
+            if cell == X:
+                count["X"] += 1
+            elif cell == O:
+                count["O"] += 1
+            elif cell == EMPTY:
+                count["EMPTY"] += 1
+            
+    return count
