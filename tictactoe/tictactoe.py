@@ -61,12 +61,12 @@ def result(board, action):
     row = action[0]
     column = action[1]
     result = deepcopy(board)
-    player = player(board)
+    playerItem = player(board)
 
     #check
     if board[row][column] != EMPTY:
         raise IlegalMoveError("Ilegal Move")
-    result[row][column] = player
+    result[row][column] = playerItem
 
     return result
     raise NotImplementedError
@@ -76,6 +76,49 @@ def winner(board):
     """
     Returns the winner of the game, if there is one.
     """
+    vertical = 0
+    horizontal = 0
+    diagonal = 0
+    
+    #loop through all the board
+    for i in range(len(board)):
+        horizontal = 0
+        #check by counting the number of edge item in horizontal line
+        horizontalEdge = board[i][0]
+        for j in range(len(board[i])):
+            if board[i][j] == horizontalEdge:
+                horizontal += 1
+            
+            else:
+                horizontal = 0
+            if horizontal == 3 and horizontalEdge != None:
+                return horizontalEdge
+            #count to down if now row is 0
+            vertical = 0
+            verticalEdge = board[i][j]
+            if i == 0:
+                for row in range(len(board)):
+                    if board[row][j] == verticalEdge and verticalEdge != None:
+                        vertical += 1
+                    else:
+                        vertical = 0
+                    if vertical == 3:
+                        return verticalEdge
+            #go diagonal if its now at 0,0 or 0,3
+            diagonal = 0
+            step = 0
+            if i == 0 and j == 0 or j == 2:
+                diagonalEdge = board[i][j]
+                if j == 0:
+                    step = 1
+                else:
+                    step = -1
+                #for loop but the step depends on a variable
+                
+    
+    #check if h/v/d is 3 then return winner
+    
+
     raise NotImplementedError
 
 
