@@ -106,15 +106,31 @@ def winner(board):
                         return verticalEdge
             #go diagonal if its now at 0,0 or 0,3
             diagonal = 0
-            step = 0
-            if i == 0 and j == 0 or j == 2:
-                diagonalEdge = board[i][j]
-                if j == 0:
-                    step = 1
-                else:
-                    step = -1
-                #for loop but the step depends on a variable
-                
+            stepj = 0
+            if i == 0: 
+                if j == 0 or j == 2:
+                    diagonalEdge = board[i][j]
+                    if j == 0:
+                        stepj = 1
+                    else:
+                        stepj = -1
+                    #for loop but the step depends on a variable
+                    #k denote the iteration, will use it to modify both row and columns
+                    # in diagonal movement both row and column is decreased with same value but 
+                    # can be in one side a subtraction the other opposite
+                    # in this loop we go from 0 to 2 (included)
+                    # i should always start at zero so I just use the number here
+                    for k in range(0, len(board)):
+                        modifierj = stepj * k
+                       
+                        if board[0 + k][j + modifierj] == diagonalEdge:
+                            diagonal += 1
+                        if diagonal == 3:
+                            return diagonalEdge
+    return None
+
+                    
+
     
     #check if h/v/d is 3 then return winner
     
@@ -138,6 +154,13 @@ def utility(board):
     """
     Returns 1 if X has won the game, -1 if O has won, 0 otherwise.
     """
+    finalWinner = winner(board)
+    if finalWinner == X:
+        return 1
+    elif finalWinner == O:
+        return -1
+    else:
+        return 0
     raise NotImplementedError
 
 

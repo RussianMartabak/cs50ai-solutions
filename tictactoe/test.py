@@ -19,7 +19,7 @@ class TestWinnerMethod(unittest.TestCase):
             self.X,
             "Checked middle vertical victory correctfully"
         )
-    def test_bottom_winner(self):
+    def test_bottom_horizontal_winner(self):
         self.assertEqual(
             ttt.winner(
                 [[self.EMPTY, self.X, self.EMPTY],
@@ -29,7 +29,34 @@ class TestWinnerMethod(unittest.TestCase):
             self.O,
             "Checked bottom horizontal victory correctfully"
         )
+    def test_no_winner(self):
+        self.assertEqual(
+            ttt.winner(
+                [[self.EMPTY, self.O, self.EMPTY],
+                [self.EMPTY, self.X, self.EMPTY],
+                [self.EMPTY, self.X, self.EMPTY]]
+            ),
+            None
+        )
     
+    def test_diagonal_victory(self):
+        self.assertEqual(
+            ttt.winner(
+                [[self.X, self.O, self.EMPTY],
+                [self.EMPTY, self.X, self.EMPTY],
+                [self.EMPTY, self.X, self.X]]
+            ),
+            self.X
+        )
+    def test_diagonal_victory2(self):
+        self.assertEqual(
+            ttt.winner(
+                [[self.EMPTY, self.O, self.O],
+                [self.EMPTY, self.O, self.EMPTY],
+                [self.O, self.X, self.X]]
+            ),
+            self.O
+        )
 
 if __name__ == '__main__':
     unittest.main()
