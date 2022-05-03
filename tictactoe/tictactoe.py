@@ -9,7 +9,7 @@ from shutil import ExecError
 X = "X"
 O = "O"
 EMPTY = None
-
+explorations = 0
 
 def initial_state():
     """
@@ -45,7 +45,7 @@ def actions(board):
     # i is row, j is column
     # basically just get all empty cells
     for i in range(len(board)):
-        for j in range(len(i)):
+        for j in range(len(board[i])):
             if board[i][j] == EMPTY:
                 actions.add((i, j))
     return actions
@@ -143,7 +143,7 @@ def terminal(board):
     Returns True if game is over, False otherwise.
     """
     state = countItem(board)
-    if state["EMPTY"] == 0:
+    if state["EMPTY"] == 0 or winner(board) is not None:
         return True
     else:
         return False
@@ -168,6 +168,46 @@ def minimax(board):
     """
     Returns the optimal action for the current player on the board.
     """
+    #return (i, j)
+    #probably need to make subfunctions for picking the worst value or the best value
+    #poll action, get player
+    possibleActions = actions(board)
+    activePlayer = player(board)
+    bestValue = None
+    if activePlayer == X:
+        bestValue = -2
+    else:
+        bestValue = 2
+    best = None
+    # generate max/min value of actions and pick an action that suit the AI personality
+    decisions = [] #list of dictionary of decisions and its value
+    for action in possibleActions:
+        if activePlayer == X:
+            
+            decisionValue = maxValue(action, board)
+            if decisionValue > bestValue:
+                bestValue = decisionValue
+            dict = {
+                "value" : decisionValue,
+                "action" : action
+            }
+            decisions.append(dict)
+        else:
+            decisionValue = minValue(action, board)
+            if decisionValue < bestValue:
+                bestValue = decisionValue
+            dict = {
+                "value" : decisionValue,
+                "action" : action
+            }
+            decisions.append(dict)
+
+    #pick 
+    for item in decisions:
+        if item["value"] == bestValue:
+            #print('explored:', explorations)
+            return item["action"]
+
     raise NotImplementedError
 
 #function to count board cells for items
@@ -188,5 +228,50 @@ def countItem(board):
                 count["EMPTY"] += 1
             
     return count
+
+#take action (i, j) and return the max value
+def maxValue(action, board):
+    #base state
+    #global explorations 
+    #explorations += 1
+    currentBoard = deepcopy(board)
+    afterBoard = result(currentBoard, action)
+    if terminal(afterBoard):
+        return utility(afterBoard)
+    #recursive state
+    #generate multiple decisions
+    possibilities = actions(afterBoard)
+    #consider each by getting the value from min player
+    max = -2
+    #get what value would a min player give to the board
+    for action in possibilities:
+        decisionValue = minValue(action, afterBoard)
+        if decisionValue > max:
+            max = decisionValue
+
+        
+    return max
+
+def minValue(action, board):
+    #base state
+    #global explorations
+    #explorations += 1
+    currentBoard = deepcopy(board)
+    afterBoard = result(currentBoard, action)
+    if terminal(afterBoard):
+        return utility(afterBoard)
+    #recursive state
+    #generate multiple decisions
+    possibilities = actions(afterBoard)
+    #consider each by getting the value from max player
+    min = 2
+    
+    for action in possibilities:
+        decisionValue = maxValue(action, afterBoard)
+        if decisionValue < min:
+            min = decisionValue
+        
+    return min
+
 class IlegalMoveError(Exception):
     pass

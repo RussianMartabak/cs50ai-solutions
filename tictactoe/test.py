@@ -57,6 +57,37 @@ class TestWinnerMethod(unittest.TestCase):
             ),
             self.O
         )
+    def test_min_value(self):
+        self.assertEqual(
+            ttt.minValue(
+                (2, 2),
+                [[self.X, self.EMPTY, self.O],
+                [self.EMPTY, self.X, self.O],
+                [self.X, self.EMPTY, self.EMPTY]]
+            ),
+            -1
+        )
+    def test_min_value_recursive(self):
+        self.assertEqual(
+            ttt.minValue(
+                (1, 2),
+                [[self.X, self.O, self.O],
+                [self.EMPTY, self.X, self.EMPTY],
+                [self.X, self.EMPTY, self.EMPTY]]
+            ),
+            1
+        )
+    
+    def test_max_value(self):
+        self.assertEqual(
+            ttt.minValue(
+                (2, 2),
+                [[self.X, self.EMPTY, self.O],
+                [self.EMPTY, self.X, self.O],
+                [self.X, self.EMPTY, self.EMPTY]]
+            ),
+            -1
+        )
 
 if __name__ == '__main__':
     unittest.main()
