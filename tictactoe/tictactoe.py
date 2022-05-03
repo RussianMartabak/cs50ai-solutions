@@ -205,7 +205,7 @@ def minimax(board):
     #pick 
     for item in decisions:
         if item["value"] == bestValue:
-            #print('explored:', explorations)
+            print('explored:', explorations)
             return item["action"]
 
     raise NotImplementedError
@@ -232,8 +232,8 @@ def countItem(board):
 #take action (i, j) and return the max value
 def maxValue(action, board):
     #base state
-    #global explorations 
-    #explorations += 1
+    global explorations 
+    explorations += 1
     currentBoard = deepcopy(board)
     afterBoard = result(currentBoard, action)
     if terminal(afterBoard):
@@ -254,8 +254,8 @@ def maxValue(action, board):
 
 def minValue(action, board):
     #base state
-    #global explorations
-    #explorations += 1
+    global explorations
+    explorations += 1
     currentBoard = deepcopy(board)
     afterBoard = result(currentBoard, action)
     if terminal(afterBoard):
