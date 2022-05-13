@@ -171,6 +171,8 @@ def minimax(board):
     #return (i, j)
     #probably need to make subfunctions for picking the worst value or the best value
     #poll action, get player
+    global explorations
+    explorations = 0
     possibleActions = actions(board)
     activePlayer = player(board)
     bestValue = None
