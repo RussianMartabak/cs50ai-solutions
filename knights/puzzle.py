@@ -28,6 +28,13 @@ knowledge0 = And(
 # B says nothing.
 knowledge1 = And(
     # TODO
+    # A character can only be one
+    Or(And(AKnight, Not(AKnave)), And(AKnave, Not(AKnight))),
+    Or(And(BKnight, Not(BKnave)), And(BKnave, Not(BKnight))),
+    # Either A is lying so b is knight or else
+    Or(And(AKnave, BKnave), And(AKnave, BKnight)),
+    # If A is honest about his statement he is knight
+    Implication(And(AKnave, BKnave), AKnight)
 )
 
 # Puzzle 2
@@ -35,6 +42,13 @@ knowledge1 = And(
 # B says "We are of different kinds."
 knowledge2 = And(
     # TODO
+     # A character can only be one
+    Or(And(AKnight, Not(AKnave)), And(AKnave, Not(AKnight))),
+    Or(And(BKnight, Not(BKnave)), And(BKnave, Not(BKnight))),
+    # The statements and their implications
+    Implication(Or(And(AKnave, BKnave), And(AKnight, BKnight)), And(AKnight, BKnave)),
+    Implication(Or(And(AKnave, BKnight), And(AKnight, BKnave)), And(AKnave, BKnight)),
+    
 )
 
 # Puzzle 3
@@ -44,6 +58,25 @@ knowledge2 = And(
 # C says "A is a knight."
 knowledge3 = And(
     # TODO
+    # A character can only be one
+    Or(And(AKnight, Not(AKnave)), And(AKnave, Not(AKnight))),
+    Or(And(BKnight, Not(BKnave)), And(BKnave, Not(BKnight))),
+    Or(And(CKnight, Not(CKnave)), And(CKnave, Not(CKnight))),
+    # implications of whether C is knave or not
+    # only one between B and C can be knight
+    # if C is honest then A is a knight and B lying
+    Implication(CKnave, And(BKnight, AKnave)),
+    Implication(CKnight, And(BKnave, AKnight)),
+    # if A say he is knave and he is actually knave and he is a knight cus honest 
+    # at the same time 
+    Implication(And(BKnight, CKnave), And(AKnave, AKnight))
+    
+    
+    
+    # If he A says he is Knave and right that would make him a Knight lol 
+    # which is not possible but ok
+
+
 )
 
 
