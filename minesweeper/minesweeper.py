@@ -105,12 +105,20 @@ class Sentence():
         """
         Returns the set of all cells in self.cells known to be mines.
         """
+        # if number of cells and count is the same and is not zero
+        if len(self.cells) == self.count and self.count > 0:
+            return self.cells
+        return None
         raise NotImplementedError
 
     def known_safes(self):
         """
         Returns the set of all cells in self.cells known to be safe.
         """
+        #if its zero all the cells is definitely safe
+        if len(self.cells) > 0 and self.count == 0:
+            return self.cells
+        return None
         raise NotImplementedError
 
     def mark_mine(self, cell):
@@ -118,6 +126,10 @@ class Sentence():
         Updates internal knowledge representation given the fact that
         a cell is known to be a mine.
         """
+        if cell in self.cells:
+            self.cells.remove(cell)
+            self.count -= 1
+        return
         raise NotImplementedError
 
     def mark_safe(self, cell):
@@ -125,6 +137,9 @@ class Sentence():
         Updates internal knowledge representation given the fact that
         a cell is known to be safe.
         """
+        if cell in self.cells:
+            self.cells.remove(cell)
+        return
         raise NotImplementedError
 
 
@@ -182,6 +197,79 @@ class MinesweeperAI():
             5) add any new sentences to the AI's knowledge base
                if they can be inferred from existing knowledge
         """
+        self.moves_made.add(cell)
+        self.mark_safe(cell)
+        # make a sentence
+        
+        # get all cell's neighbors
+        neighbors = []
+        # if row is not zero add the upper three cells
+        # if 8 skip bottom checking
+        # if column is not zero add left and right too
+        # if zero add only right if 8 add only left 
+        row = cell[0]
+        column = cell[1]
+        # start at upper row and leftmost column, scan all column and move on
+        for i in range(row - 1, row + 2, 1):
+            for j in range(column - 1, column + 2, 1):
+                currentCell = (i, j)
+                if (i >= 0 and j >= 0 and currentCell != cell and i < self.height 
+                and j < self.width):
+                    neighbors.append((i, j))
+        
+        # add all neigbouring cells and its counts exclude a cell that has been marked
+        for cell in neighbors:
+            if cell in self.safes:
+                neighbors.remove(cell)
+            if cell in self.mines:
+                neighbors.remove(cell)
+                count -= 1
+        # add knowledge 
+        self.knowledge.append(Sentence(neighbors, count))
+        # conclude a mine or safe based on existing knowledge
+        safes = []
+        mines = []
+        for sentence in self.knowledge:
+            if sentence.known_safes():
+                safes = list(sentence.known_safes())
+                for cell in safes:
+                    self.mark_safe(cell) # this remove a cell from a sentence
+            if sentence.known_mines():
+                mines = list(sentence.known_mines())
+                for cell in mines:
+                    self.mark_mine(cell)
+        # infer new sentences
+        # if a sentence is a subset, make new sentence and delete both
+        for sentence in self.knowledge:
+            for peer in self.knowledge:
+                if (len(sentence.cells.difference(peer.cells)) == 0  
+                and len(peer.cells) > len(sentence.cells)):
+                    # add new sentence that contains things that not exist in the subset
+                    # handle count
+                    cells = peer.cells.difference(sentence.cells)
+                    counts = peer.count - sentence.count
+                    self.knowledge.remove(peer)
+                    
+                    
+                    # add new sentence
+                    self.knowledge.append(Sentence(cells, counts))
+                elif (len(peer.cells.difference(sentence.cells)) == 0  
+                and len(sentence.cells) > len(peer.cells)):
+                    # add new sentence that contains things that not exist in the subset
+                    # handle count
+                    cells = sentence.cells.difference(peer.cells)
+                    counts = sentence.count - peer.count
+                    # removing nothing because need to ensure they a
+                    self.knowledge.remove(peer)
+                    
+                    
+                    
+                    # add new sentence
+                    self.knowledge.append(Sentence(cells, counts))
+
+
+
+        return
         raise NotImplementedError
 
     def make_safe_move(self):
@@ -193,6 +281,12 @@ class MinesweeperAI():
         This function may use the knowledge in self.mines, self.safes
         and self.moves_made, but should not modify any of those values.
         """
+        # return known safe thats not in move made
+        for cell in self.safes:
+            if cell not in self.moves_made:
+                return cell
+       
+        return None
         raise NotImplementedError
 
     def make_random_move(self):
@@ -202,4 +296,46 @@ class MinesweeperAI():
             1) have not already been chosen, and
             2) are not known to be mines
         """
+        # check if knowledge if empty : random
+        if len(self.knowledge) == 0:
+            randi = random.randint(0, self.height - 1)
+            randj = random.randint(0, self.width - 1)
+            while ((randi, randj) in self.moves_made or (randi, randj) in self.mines):
+                randi = random.randint(0, self.height - 1)
+                randj = random.randint(0, self.width - 1)
+            return (randi, randj)
+        # get a list of sentences from knowledge that not contain explored cell
+        cleanSentences = []
+        
+        for sentence in self.knowledge:
+            clean = True
+            for cell in self.mines:
+                if cell in sentence.cells:
+                    clean = False
+                    break
+            for cell in self.moves_made:
+                if cell in sentence.cells:
+                    clean = False
+                    break
+            if clean and len(sentence.cells) != 0 :
+                cleanSentences.append(sentence)
+
+        # pick the one that has the biggest ratio of munber of cells per count
+        max = 0
+        best = None
+        for sentence in cleanSentences:
+            if sentence.count == 0:
+                continue
+            ratio = len(sentence.cells) / sentence.count
+            if ratio > max :
+                max = ratio
+                best = sentence.cells.copy()
+        
+        
+        # pick a random cell from sentence's set if the best was found
+        if best:
+            index = random.randint(0, len(best))
+            return best.pop()
+        
+        return None
         raise NotImplementedError
