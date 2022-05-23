@@ -4,3 +4,6 @@ tictactoe.zip
 venv
 tictactoe/__pycache__
 minesweeper.zip
+minesweeper/venv
+minesweeper/__pycache__
+pagerank.zip
