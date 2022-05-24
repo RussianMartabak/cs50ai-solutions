@@ -132,6 +132,68 @@ def iterate_pagerank(corpus, damping_factor):
     their estimated PageRank value (a value between 0 and 1). All
     PageRank values should sum to 1.
     """
+   
+        
+    total = len(corpus)
+    # this should store all websites that have link to key website
+    incomingPages = {}
+    pageRanks = {}
+    
+    for webpage in corpus:
+        pageRanks[webpage] = 1 / total
+        incomingPages[webpage] = []
+    # initiate incoming pages
+    for webpage in corpus:
+        # if no links
+        if len(corpus[webpage]) == 0:
+            for webpage2 in corpus:
+                if webpage not in incomingPages[webpage2]:
+                    incomingPages[webpage2].append(webpage)
+        else:
+            #normal
+            for link in corpus[webpage]:
+                incomingPages[link].append(webpage)
+    # start calculating pagerank based on formulae
+    randomChance = (1 - damping_factor) / total
+    i = 0
+    maxDeviation = 1000
+    while maxDeviation >= 0.001:
+        maxDeviation = 0
+        # in each iteration, swap the pageranks dict
+        tempPR = {}
+        for webpage in corpus:
+            # the total pageranks from all pagei
+            sigmaGrindset = 0
+            
+            # get page(i)
+            for pi in incomingPages[webpage]:
+                # need to get the biggest deviation of pagerank of webpage for each webpage
+                # cheked
+                numlinks = len(corpus[pi])
+                if numlinks == 0:
+                    numlinks = total
+                linkProb = pageRanks[pi] / numlinks 
+                sigmaGrindset += linkProb
+                
+                # print(pi, numlinks)
+            
+            sigmaGrindset *= damping_factor
+            
+            
+            
+            newPR = (sigmaGrindset + randomChance)
+            diffPR = pageRanks[webpage] - newPR
+            tempPR[webpage] = newPR
+            deviation = abs(diffPR)
+            if deviation > maxDeviation:
+                maxDeviation = deviation
+            
+            
+        pageRanks = tempPR
+        
+        i += 1
+    
+    return pageRanks
     raise NotImplementedError
 
 
