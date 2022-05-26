@@ -1,6 +1,7 @@
 import csv
 import itertools
 import sys
+import copy
 
 PROBS = {
 
@@ -139,7 +140,23 @@ def joint_probability(people, one_gene, two_genes, have_trait):
         * everyone in set `have_trait` has the trait, and
         * everyone not in set` have_trait` does not have the trait.
     """
-    raise NotImplementedError
+    # find the probabilities of all that thing and multiply it together. now thats a join one
+    # make proper query first about genes
+    # need unit test to make sure this works well
+    query = copy.deepcopy(people)
+    for person in people:
+        if person in one_gene:
+            query[person]["gene"] = 1
+        elif person in two_genes:
+            query[person]["gene"] = 2
+        else:
+            query[person]["gene"] = 0
+    # make an array for parents
+    parents = []
+    # prob for each query, key will be the names
+    probs = {}
+
+    #raise NotImplementedError
 
 
 def update(probabilities, one_gene, two_genes, have_trait, p):
