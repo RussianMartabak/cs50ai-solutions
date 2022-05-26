@@ -8,3 +8,5 @@ minesweeper/venv
 minesweeper/__pycache__
 pagerank.zip
 heredity.zip
+.vscode
+heredity/__pycache__

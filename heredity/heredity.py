@@ -145,18 +145,42 @@ def joint_probability(people, one_gene, two_genes, have_trait):
     # need unit test to make sure this works well
     query = copy.deepcopy(people)
     for person in people:
+        people[person]['prob'] = 0
         if person in one_gene:
             query[person]["gene"] = 1
         elif person in two_genes:
             query[person]["gene"] = 2
         else:
             query[person]["gene"] = 0
-    # make an array for parents
-    parents = []
-    # prob for each query, key will be the names
-    probs = {}
+        # set trait
+        if person in have_trait:
+            query[person]['trait'] = True
+        else:
+            query[person]['trait'] = False
+        
 
-    #raise NotImplementedError
+    # make an array for parent's string
+    calculatedProb = []
+    
+    
+    
+    for person in people:
+        probability = QProbability(
+            query[person],
+            query, 
+            query[person]['mother'],
+            query[person]['father'],
+            
+            )
+        calculatedProb.append(probability)
+
+
+    result = 1
+    for value in calculatedProb:
+        result *= value
+        
+    return result
+    raise NotImplementedError
 
 
 def update(probabilities, one_gene, two_genes, have_trait, p):
@@ -166,6 +190,33 @@ def update(probabilities, one_gene, two_genes, have_trait, p):
     Which value for each distribution is updated depends on whether
     the person is in `have_gene` and `have_trait`, respectively.
     """
+    people = []
+    knowledge = {}
+    # form a data for each person
+    # find out all the people present
+    # we have no info of those with 0 gene or not trait
+    # we can steal those from argument!!
+    for person in probabilities:
+        if person in two_genes:
+            target = probabilities[person]['gene'][2]
+            probabilities[person]['gene'][2] += p
+            
+        elif person in one_gene:
+            probabilities[person]['gene'][1] += p
+            
+            
+        else:
+            probabilities[person]['gene'][0] += p
+            
+        # now for trait
+        if person in have_trait:
+            probabilities[person]['trait'][True] += p
+            
+        else:
+            probabilities[person]['trait'][False] += p
+           
+    return
+        
     raise NotImplementedError
 
 
@@ -174,8 +225,78 @@ def normalize(probabilities):
     Update `probabilities` such that each probability distribution
     is normalized (i.e., sums to 1, with relative proportions the same).
     """
+    for person in probabilities:
+        sumGene = 0
+        
+        
+        for i in range(3):
+            sumGene += probabilities[person]['gene'][i]
+        
+        geneConstant = 1 / sumGene
+        for i in range(3):
+            probabilities[person]['gene'][i] *= geneConstant
+            probabilities[person]['gene'][i] = round(probabilities[person]['gene'][i], 4)
+        
+        # for trait
+        sumTrait = probabilities[person]['trait'][False] + probabilities[person]['trait'][True]
+        traitConstant = 1 / sumTrait
+        probabilities[person]['trait'][False] *= traitConstant
+        probabilities[person]['trait'][False] = round(probabilities[person]['trait'][False], 4)
+
+        probabilities[person]['trait'][True]  *= traitConstant
+        probabilities[person]['trait'][True] = round(probabilities[person]['trait'][True], 4)
+    
+
+def QProbability(personalquery, query, motherName=None, fatherName=None):
+    # calculate an individual query
+    # need a query, mother's query with probability
+    # need to reason to make possibilities to be checked
+    inheritProbs = {
+        2: 1,
+        0: 0,
+        1: 0.5
+    }
+    # base state
+    if motherName == None:
+        geneNumber = personalquery['gene']
+        geneProb = PROBS["gene"][geneNumber]
+        if personalquery['trait'] is True:
+            return PROBS['trait'][geneNumber][True] * geneProb
+        elif personalquery['trait'] is False:
+            return PROBS['trait'][geneNumber][False] * geneProb
+    # here come recursiveness eh maybe not needed...
+    # i just need to know the parent's genes and trait query. the rest can be multiplied
+    # after every prob is calculated
+    else:
+        # has parent
+        # need to calc trait too after this
+        father = query[fatherName]
+        mother = query[motherName]
+        traitProb = PROBS["trait"][personalquery['gene']][personalquery['trait']]
+        if personalquery["gene"] == 0:
+            # prob of m and f not inheriting
+            mchance = abs(1 - inheritProbs[mother['gene']] - PROBS['mutation'])
+            fchance = abs(1 - inheritProbs[father['gene']] - PROBS["mutation"])
+            inheritProb = mchance * fchance
+            return inheritProb * traitProb
+        elif personalquery["gene"] == 1:
+            # prob of m and not f, f and not m
+            mchance = abs(inheritProbs[mother['gene']] - PROBS['mutation'])
+            fchance = abs(1 - inheritProbs[father['gene']] - PROBS['mutation'])
+            case1 = mchance * fchance
+            # f not m
+            mchance = abs(inheritProbs[father['gene']] - PROBS['mutation'])
+            fchance = abs(1 - inheritProbs[mother['gene']] - PROBS['mutation'])
+            case2 = mchance * fchance
+            inheritProb = case1 + case2
+            return inheritProb * traitProb
+        elif personalquery["gene"] == 2:
+            # prob of both m and f inherit
+            mchance = abs(inheritProbs[mother['gene']] - PROBS['mutation'])
+            fchance = abs(inheritProbs[father['gene']] - PROBS['mutation'])
+            inheritProb = mchance * fchance
+            return inheritProb * traitProb
     raise NotImplementedError
-
-
+    
 if __name__ == "__main__":
     main()
