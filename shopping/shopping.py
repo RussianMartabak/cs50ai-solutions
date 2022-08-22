@@ -148,26 +148,23 @@ def evaluate(labels, predictions):
             truePositives += 1
         else:
             trueNegatives += 1
-    predictPositives = 0
-    predictNegatives = 0
-    for p in predictions:
-        if p == 1:
-            predictPositives += 1
-        else:
-            predictNegatives += 1
-    sensitivity = 0
-    specificity = 0
-    if predictPositives > truePositives:
-        sensitivity = 1
-    else:
-        sensitivity = predictPositives / truePositives
+    correctPositives = 0
+    correctNegatives = 0
     
-    if predictNegatives > trueNegatives:
-        specificity = 1
-    else:
-        specificity = predictNegatives / trueNegatives
+    xy = zip(labels, predictions)
+    comparison = list(xy)
+    for c in comparison:
+        if c[0] == c[1]:
+            if c[0] == 1:
+                correctPositives += 1
+            elif c[0] == 0:
+                correctNegatives += 1
+    sensitivity = correctPositives / truePositives
+    specificity = correctNegatives / trueNegatives
     
     return (sensitivity, specificity)
+
+    
 
 if __name__ == "__main__":
     main()
