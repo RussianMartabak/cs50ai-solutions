@@ -1,3 +1,4 @@
+from operator import ne
 import sys
 
 from crossword import *
@@ -104,7 +105,7 @@ class CrosswordCreator():
        
         for var in self.domains:
             for word in self.domains[var].copy():
-                if (len(word) > var.length):
+                if (len(word) != var.length):
                     self.domains[var].remove(word)
                 
         return
@@ -153,13 +154,43 @@ class CrosswordCreator():
         Return True if arc consistency is enforced and no domains are empty;
         return False if one or more domains end up empty.
         """
+        queue = []
+        if len(queue) == 0:
+            for var in self.crossword.variables:
+                neighbors = self.crossword.neighbors(var)
+                for nei in neighbors:
+                    queue.append((var, nei))
+        else:
+            queue = arcs
+        
+        while len(queue) != 0:
+            convar = queue.pop(0)
+            x = convar[0]
+            y = convar[1]
+            if self.revise(convar[0], convar[1]):
+                if len(self.domains[x]) == 0:
+                    return False
+                for z in self.crossword.neighbors(x):
+                    if z != y:
+                        queue.append((z, x))
+
+        return True
+
         raise NotImplementedError
 
     def assignment_complete(self, assignment):
         """
         Return True if `assignment` is complete (i.e., assigns a value to each
         crossword variable); return False otherwise.
-        """
+        """ 
+        # keyerror?
+        complete = True
+        for var in self.crossword.variables:
+            if var not in assignment or assignment[var] == None:
+                complete = False
+                break
+        
+        return complete
         raise NotImplementedError
 
     def consistent(self, assignment):
@@ -167,6 +198,24 @@ class CrosswordCreator():
         Return True if `assignment` is consistent (i.e., words fit in crossword
         puzzle without conflicting characters); return False otherwise.
         """
+        consist = True
+        for var in assignment:
+            cword = assignment[var]
+            if len(cword) != var.length:
+                consist =  False
+                break
+            # WIP check overlaps consistency
+            neighbors = self.crossword.neighbors(var)
+            for y in neighbors:
+                if y in assignment:
+                    overl = self.crossword.overlaps[var, y]
+                    i = overl[0]
+                    j = overl[1]
+                    yword = assignment[y]
+                    if yword == cword or cword[i] != yword[j]:
+                        consist = False
+                        break
+        return consist
         raise NotImplementedError
 
     def order_domain_values(self, var, assignment):
@@ -176,6 +225,33 @@ class CrosswordCreator():
         The first value in the list, for example, should be the one
         that rules out the fewest values among the neighbors of `var`.
         """
+        domains = {
+
+        }
+        for word in self.domains[var]:
+            domains[word] = 0
+        neighbors = self.crossword.neighbors(var)
+        for neighbor in neighbors.copy():
+            if neighbor in assignment:
+                neighbors.remove(neighbor)
+        # neighbors refer to unassigned neigbors
+        # calculate n (number of impossible choices in y's domains)
+        for val in domains:
+            # word in x's domain
+            for y in neighbors:
+                overlap = self.crossword.overlaps[var, y]
+                i = overlap[0]
+                j = overlap[1] 
+                for yword in self.domains[y]:
+                    # count those that dont match
+                    if val == yword or val[i] != yword[j]:
+                        domains[val] += 1 
+
+        # domains is a set
+        # sort the dict and return list
+        result = sorted(domains, key=lambda domain : domains[domain])
+        return result
+
         raise NotImplementedError
 
     def select_unassigned_variable(self, assignment):
@@ -186,6 +262,38 @@ class CrosswordCreator():
         degree. If there is a tie, any of the tied variables are acceptable
         return values.
         """
+        # assignment is var : string dictionary
+        variables = self.crossword.variables
+        assigned = []
+        for key in assignment:
+            assigned.append(key)
+        # fix heuristic late
+        # heuristic: find mvr values
+        minLen = 999999999
+        for var in variables:
+            if var not in assigned:
+                minLen = min(minLen, len(self.domains[var]))
+        # put a list of vars with the maximum len specified
+        minLens = []
+        for var in variables:
+            if var not in assigned and len(self.domains[var])  == minLen:
+                minLens.append(var)
+
+        # pick the one with highest degrees if more 
+        if len(minLens) == 1:
+            return minLens[0]
+        else:
+            survivor = minLens[0]
+            for var in minLens:
+                degree = self.crossword.neighbors(var)
+                survDegree = self.crossword.neighbors(survivor)
+                if degree > survDegree:
+                    survivor = var
+            return survivor
+        
+
+        
+
         raise NotImplementedError
 
     def backtrack(self, assignment):
@@ -197,6 +305,18 @@ class CrosswordCreator():
 
         If no assignment is possible, return None.
         """
+        if self.assignment_complete(assignment):
+            return assignment
+        var = self.select_unassigned_variable(assignment)
+        for value in self.order_domain_values(var, assignment):
+            if value not in assignment:
+                assignment[var] = value
+                if self.consistent(assignment):
+                    result = self.backtrack(assignment)
+                    if result:
+                        return result
+                del assignment[var]
+        return False
         raise NotImplementedError
 
 
