@@ -63,11 +63,19 @@ def load_data(data_dir):
     os.chdir(data_dir)
     num = 0
     images = []
+    labels = []
     while (num < NUM_CATEGORIES):
         files = os.listdir(f'{num}')
-        print(files)
+        for file in files:
+            img = cv2.imread(os.path.join(f'{num}', file))
+            imgres = cv2.resize(img, (IMG_WIDTH, IMG_HEIGHT))
+            images.append(imgres)
+            labels.append(num)
         num += 1
+
+    return (images, labels)
     # open a file 
+    
     # resize image
     currCat = 0
     raise NotImplementedError
@@ -79,6 +87,34 @@ def get_model():
     `input_shape` of the first layer is `(IMG_WIDTH, IMG_HEIGHT, 3)`.
     The output layer should have `NUM_CATEGORIES` units, one for each category.
     """
+    model = tf.keras.models.Sequential([
+        # Convolution filters training
+        tf.keras.layers.Conv2D(
+            40, (5, 5), activation="relu", input_shape=(IMG_WIDTH, IMG_HEIGHT, 3)
+        ),
+
+        tf.keras.layers.MaxPooling2D(pool_size=(2, 2)),
+        
+
+        tf.keras.layers.Flatten(),
+
+        tf.keras.layers.Dense(115, activation="relu"),
+        tf.keras.layers.Dropout(0.25), 
+
+
+        
+
+        tf.keras.layers.Dense(NUM_CATEGORIES, activation="softmax")
+
+    ])
+
+    model.compile(
+        optimizer="adam",
+        loss="categorical_crossentropy",
+        metrics=["accuracy"]
+    )
+
+    return model
     raise NotImplementedError
 
 
